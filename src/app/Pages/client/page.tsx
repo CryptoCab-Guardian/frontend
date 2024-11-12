@@ -59,7 +59,7 @@ const mockOrders: Record<string, Order[]> = {
 };
 
 export default function Drive() {
-  type TabType = "Delivered" | "Accepted" | "Upcoming";
+    type TabType = "Completed" | "Accepted" | "Upcoming";
   const [activeTab, setActiveTab] = useState<TabType>("Upcoming");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
@@ -77,7 +77,7 @@ export default function Drive() {
     <div className="min-h-screen bg-gray-100 p-3">
       <div className="flex justify-between max-w-7xl mx-auto">
         <div className="flex justify-center space-x-4 mt-8 mb-6">
-          {(["Upcoming", "Accepted", "Delivered"] as TabType[]).map((tab) => (
+          {(["Upcoming", "Accepted", "Completed"] as TabType[]).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}

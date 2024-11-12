@@ -8,18 +8,15 @@ const Navbar = () => {
   
         
         <div className="hidden md:flex space-x-4">
-          <a href="#" className="hover:underline">
+          <Link href="/Pages/Login" className="hover:underline">
             Ride
-          </a>
-          <a href="#" className="hover:underline">
+          </Link>
+          <Link href="/Pages/Login" className="hover:underline">
             Drive
-          </a>
-          <a href="#" className="hover:underline">
-            Business
-          </a>
-          <a href="#" className="hover:underline">
-            About
-          </a>
+          </Link>
+          <Link href="/Pages/Wallet" className="hover:underline">
+            Wallet
+          </Link>
         </div>
   
         <div className="space-x-4 flex items-center">

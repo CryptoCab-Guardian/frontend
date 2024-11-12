@@ -1,7 +1,13 @@
-import React from "react";
-import { AiOutlinePlus } from "react-icons/ai";
+"use client"
+import React, { useState } from "react";
 
 const UberWalletPage = () => {
+  const [accountType, setAccountType] = useState("");
+
+  const handleAccountTypeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setAccountType(event.target.value);
+  };
+
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="flex flex-col items-start mx-auto max-w-7xl p-5">
@@ -12,39 +18,28 @@ const UberWalletPage = () => {
             <p className="text-gray-600 mt-2">
               Add the bank account where you want to receive payouts
             </p>
-            <button className="flex items-center justify-center mt-4 bg-black text-white text-sm px-4 py-2 rounded-lg">
-              <AiOutlinePlus className="mr-2" />
-              Add bank account
-            </button>
+            <div className="mt-4">
+              <label className="text-gray-600 text-sm">Account Type</label>
+              <div className="relative mt-2">
+                <select
+                  value={accountType}
+                  onChange={handleAccountTypeChange}
+                  className="w-full bg-white border border-gray-300 text-gray-700 text-sm rounded-lg focus:outline-none focus:ring focus:ring-gray-200 p-2"
+                >
+                  <option value="" disabled>Select Account Type</option>
+                  <option value="Selenium">Selenium</option>
+                  <option value="Etherium">Etherium</option>
+                </select>
+              </div>
+            </div>
           </div>
 
           <div className="p-6 bg-white rounded-lg shadow-md">
-            <h2 className="text-gray-600 font-medium mb-2">Uber Cash</h2>
+            <h2 className="text-gray-600 font-medium mb-2">Escrow Cash</h2>
             <p className="text-3xl font-semibold">₹0.00</p>
-            <button className="flex items-center justify-center mt-4 bg-black text-white text-sm px-4 py-2 rounded-lg">
-              <AiOutlinePlus className="mr-2" />
-              Gift card
-            </button>
           </div>
         </div>
-
-        {/* Payment Methods Section */}
-        <div className="mb-8 md:ml-52 ml-5 ">
-          <h3 className="text-lg font-semibold">Payment Methods</h3>
-          <button className="flex items-center mt-2 text-black text-sm font-medium">
-            <AiOutlinePlus className="mr-2" />
-            Add Payment Method
-          </button>
-        </div>
-
-        {/* Profiles Section */}
-        <div className="md:ml-52 ml-5">
-          <h3 className="text-lg font-semibold">Profiles</h3>
-          {/* Placeholder for profile items or other UI elements */}
-        </div>
       </div>
-
-      {/* Balance and Uber Cash Cards */}
     </div>
   );
 };
