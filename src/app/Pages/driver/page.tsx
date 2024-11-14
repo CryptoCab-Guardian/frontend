@@ -1,7 +1,9 @@
 
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import BookVehicle from "@/app/components/book_vehicle/BookVehicle";
+import Navbar from "@/app/Navbar";
+import { useAuth } from "@/app/hooks/useAuth";
 
 type Order = {
   id: string;
@@ -14,7 +16,7 @@ type Order = {
 };
 
 const mockOrders: Record<string, Order[]> = {
-  Delivered: [
+  Completed: [
     {
       id: "816495",
       category: "Food",
@@ -62,6 +64,20 @@ export default function Drive() {
   type TabType = "Completed" | "Accepted" | "Upcoming";
   const [activeTab, setActiveTab] = useState<TabType>("Upcoming");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const { currentAccount, balance,initializeWeb3 } = useAuth();
+
+
+  useEffect(() => {
+    if (currentAccount) {
+      initializeWeb3(currentAccount);
+
+      const intervalId = setInterval(() => {
+        initializeWeb3(currentAccount);
+      }, 30000);
+
+      return () => clearInterval(intervalId);
+    }
+  }, [currentAccount, initializeWeb3]);
 
   const handleAccept = (id: string) => {
     console.log(`Accepted order ID: ${id}`);
@@ -74,6 +90,8 @@ export default function Drive() {
   const orders = mockOrders[activeTab];
 
   return (
+    <>
+    <Navbar/>
     <div className="min-h-screen bg-gray-100 p-3">
       <div className="flex justify-between max-w-7xl mx-auto">
         <div className="flex justify-center space-x-4 mt-8 mb-6">
@@ -89,7 +107,12 @@ export default function Drive() {
             </button>
           ))}
         </div>
-        <div className="text-lg font-bold mt-8 mb-6">Current Amount: 0.00</div>
+        <div className="flex flex-col items-end mt-8 mb-6">
+            <div className="text-lg font-bold">Current Amount:</div>
+            <div className="text-lg text-green-600">
+              Ξ {Number(balance).toFixed(4)}
+            </div>
+          </div>
       </div>
 
       {/* Main Content */}
@@ -114,7 +137,7 @@ export default function Drive() {
             <>
               <h2 className="text-2xl font-semibold mb-4">Choose a ride</h2>
               <div className="space-y-4">
-                {orders.map((order) => (
+                {orders?.map((order) => (
                   <BookVehicle
                     key={order.id}
                     order={order}
@@ -134,5 +157,6 @@ export default function Drive() {
         </div>
       </div>
     </div>
+    </>
   );
 }

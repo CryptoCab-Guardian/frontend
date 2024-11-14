@@ -1,6 +1,5 @@
 "use client"
 import "./globals.css";
-import Navbar from "./Navbar";
 
 export default function RootLayout({
   children,
@@ -11,7 +10,6 @@ export default function RootLayout({
     <html lang="en">
       <body
       >
-        <Navbar/>
         {children}
         <button 
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
