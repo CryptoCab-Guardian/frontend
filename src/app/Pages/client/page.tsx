@@ -394,13 +394,13 @@
 import { useEffect, useState } from "react";
 import Navbar from "@/app/Navbar";
 import { useAuth } from "@/app/hooks/useAuth";
-import { mockCars, allLocations } from "./DataModel";
+import { mockCars } from "./DataModel";
 import WalletDisplay from "./WalletDisplay";
 import RideSearchForm from "./RideSearchForm";
 import VehicleList from "./VehicleList";
 import MapPlaceholder from "./MapPlaceHolder";
 
-const Drive = () => {
+const Rider = () => {
   const [showVehicles, setShowVehicles] = useState(false);
   const [filteredCars, setFilteredCars] = useState(mockCars);
   const { currentAccount, balance, initializeWeb3 } = useAuth();
@@ -548,7 +548,7 @@ const Drive = () => {
           <div className="grid md:grid-cols-3 gap-6">
             <div className="md:col-span-1">
               <RideSearchForm 
-                locations={allLocations} 
+              
                 onSearch={handleSearch} 
               />
 
@@ -577,4 +577,4 @@ const Drive = () => {
   );
 };
 
-export default Drive;
+export default Rider;
