@@ -311,6 +311,7 @@ import { WebSocketService } from "./WebSocketConnection";
 import { NotificationService } from "./NotificationService";
 import { mockOrders } from "./DataModel";
 import { Order, TabType, WebSocketMessage } from "./types";
+import { LocationService } from "./LocationTrackingService";
 
 export default function Drive() {
   const [activeTab, setActiveTab] = useState<TabType>("Accepted");
@@ -318,6 +319,7 @@ export default function Drive() {
   const [upcomingRides, setUpcomingRides] = useState<Order[]>([]);
   const { currentAccount, balance } = useAuth();
   const [wsService, setWsService] = useState<WebSocketService | null>(null);
+  const [, setLocationService] = useState<LocationService | null>(null);
 
   useEffect(() => {
     const handleMessage = (data: WebSocketMessage) => {
@@ -348,8 +350,19 @@ export default function Drive() {
     service.connect();
     setWsService(service);
 
+    // Location tracking setup
+    const ls = new LocationService(currentAccount ?? undefined);
+    ls.startTracking(30); // Update every 30 seconds
+    setLocationService(ls);
+
+     // Request notification permission
+     if (Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+
     return () => {
       service.disconnect();
+      ls.stopTracking();
     };
   }, [currentAccount]);
 
