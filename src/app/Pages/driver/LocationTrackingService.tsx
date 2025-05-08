@@ -1,6 +1,6 @@
 import { Location } from "./types";
 
-const UPDATE_LOCATION_URL = 'http://localhost:777/updateDriverLocation';
+const UPDATE_LOCATION_URL = 'http://localhost:7777/updateDriverLocation';
 
 export class LocationService {
   private watchId: number | null = null;
@@ -78,8 +78,9 @@ export class LocationService {
     console.log(location);
 
     try {
+
       const response = await fetch(`${UPDATE_LOCATION_URL}/${this.driverId}`, {
-        method: 'POST',
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },

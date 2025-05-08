@@ -1,5 +1,5 @@
 import { WebSocketMessage} from './types';
-
+import { toast } from 'react-toastify';
 const WEBSOCKET_URL = 'ws://localhost:7777';
 
 export class WebSocketService {
@@ -32,31 +32,18 @@ export class WebSocketService {
         const data = JSON.parse(event.data);
         console.log('Received WebSocket message:', data);
         
-        // Convert new format to Order if it's a ride request
-        // if (data.type === 'NEW_RIDE_REQUEST' && data.src && data.dest) {
-        //   // Generate a unique ID for the ride
-        //   const rideId = Math.random().toString(36).substring(2, 15);
-          
-        //   // Convert to Order format
-        //   const rideOrder: Order = {
-        //     id: rideId,
-        //     category: "Ride Request",
-        //     price: calculatePrice(data.distance),
-        //     pickupDate: new Date().toLocaleDateString(),
-        //     pickupAddress: `${data.src.lat}, ${data.src.lng}`, // Format as needed
-        //     dropDate: new Date().toLocaleDateString(),
-        //     dropAddress: `${data.dest.lat}, ${data.dest.lng}`, // Format as needed
-        //     // You can add additional fields if needed
-        //     srcLocation: data.src, 
-        //     destLocation: data.dest,
-        //     distance: data.distance
-        //   };
-          
-        //   // Update the data with the converted ride
-        //   data.ride = rideOrder;
-        // }
+        if (data.type === 'NEW_RIDE_REQUEST') {
+          toast.info("A new ride request", {
+            position: "top-right",
+            autoClose: 6000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true
+          });
+        }
         
-        // this.onMessage(data);
+        this.onMessage(data);
       } catch (error) {
         console.error('Error processing message:', error);
       }
@@ -96,13 +83,4 @@ export class WebSocketService {
     }
   }
   
-  // // Helper function to calculate price based on distance
-  // private calculatePrice(distance: string): string {
-  //   // Basic calculation - you can make this more sophisticated
-  //   const distanceNum = parseFloat(distance) || 0;
-  //   const basePrice = 50; // Base fare
-  //   const pricePerKm = 10; // Rate per km
-  //   const totalPrice = basePrice + (distanceNum * pricePerKm);
-  //   return `₹${totalPrice.toFixed(2)}`;
-  // }
 }

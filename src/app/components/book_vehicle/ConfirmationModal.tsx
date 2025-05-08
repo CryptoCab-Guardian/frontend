@@ -43,7 +43,7 @@ function ConfirmationModal({ isOpen, onClose, onConfirm }: ConfirmationModalProp
         ) : success ? (
           <div className="flex flex-col items-center">
             <IoMdCheckmarkCircleOutline className="text-green-500 text-4xl mb-2" />
-            <p className="text-lg font-semibold text-green-600">Successfully deducted ₹10 from the order.</p>
+            <p className="text-lg font-semibold ">Successfully deducted ₹10 from the order.</p>
             <button onClick={onClose} className="mt-4 bg-green-500 text-white px-4 py-2 rounded-lg">
               Close
             </button>

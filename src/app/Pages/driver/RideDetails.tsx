@@ -14,9 +14,7 @@ export const RideDetails: React.FC<RideDetailsProps> = ({ order, onClose }) => {
       <h2 className="text-2xl font-semibold">Ride Details</h2>
       <p><strong>Category:</strong> {order.category}</p>
       <p><strong>Price:</strong> {order.price}</p>
-      <p><strong>Pickup Date:</strong> {order.pickupDate}</p>
       <p><strong>Pickup Address:</strong> {order.pickupAddress}</p>
-      <p><strong>Drop Date:</strong> {order.dropDate}</p>
       <p><strong>Drop Address:</strong> {order.dropAddress}</p>
     </div>
   );
