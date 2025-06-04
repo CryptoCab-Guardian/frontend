@@ -21,6 +21,7 @@ export type Order = {
     ride?: Order;
     rideId?: string;
     driverId?: string;
+    price?:string;
   }
 
   export async function getAddressFromCoordinates(lat: string, lng: string): Promise<string | null> {

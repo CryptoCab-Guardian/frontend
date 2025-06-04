@@ -1,4 +1,3 @@
-
 "use client";
 import { useEffect, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
@@ -32,6 +31,12 @@ export default function Drive() {
     const handleMessage = async (data: WebSocketMessage) => {
       switch (data.type) {
         case "NEW_RIDE_REQUEST":
+          console.log("New Ride Request Details:", {
+            rideId: data.rideId,
+            source: data.src,
+            destination: data.dest,
+            price: data.price,
+          });
           // Create an Order object from the incoming ride request data
           const pickup = data.src
             ? (await getAddressFromCoordinates(data.src.lat, data.src.lng)) ||
@@ -44,13 +49,12 @@ export default function Drive() {
             : "Unknown Drop Address";
 
           if (data.src && data.dest && data.rideId) {
-
             const newRide: Order = {
               id: data.rideId,
               category: "Ride Request",
-              price: "0",
-              pickupAddress: pickup, 
-              dropAddress: dropAddress, 
+              price: data.price || "0",
+              pickupAddress: pickup,
+              dropAddress: dropAddress,
             };
 
             setUpcomingRides((prev) => [...prev, newRide]);
@@ -91,70 +95,75 @@ export default function Drive() {
     };
   }, [currentAccount]);
 
-  // const handleAccept = (id: string) => {
-  //   if (wsService) {
-  //     wsService.send({
-  //       type: "ACCEPT_RIDE",
-  //       rideId: id,
-  //       driverId: currentAccount ?? undefined,
-  //     });
-
-  //     setUpcomingRides((prev) => prev.filter((ride) => ride.id !== id));
-  //     toast.success("Ride accepted successfully!");
-  //   }
-  // };
-
-
   const handleAccept = async (id: string) => {
-    console.log("Ride accept",id);
+    console.log("Ride accept", id);
     if (!currentAccount) {
       toast.error("You must be logged in to accept rides");
       return;
     }
-    
+
     // Show loading toast
     const loadingToast = toast.loading("Accepting ride...");
-    
+
     try {
       // Make a POST request to accept the ride
-      const response = await fetch(`http://localhost:7777/acceptRideByDriver/${currentAccount}/${id}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
+      const response = await fetch(
+        `http://localhost:7777/acceptRideByDriver/${currentAccount}/${id}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
         }
-      });
-      
+      );
+
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`Failed to accept ride: ${errorText}`);
       }
-      
+
+      // Find the ride that was accepted
+      const acceptedRide = upcomingRides.find((ride) => ride.id === id);
       // Remove the ride from upcoming rides list
       setUpcomingRides((prev) => prev.filter((ride) => ride.id !== id));
-      
+
+      // Add the ride to the accepted tab by updating mockOrders
+      if (acceptedRide) {
+        // Create a new ride object with updated category
+        const updatedRide = {
+          ...acceptedRide,
+          category: "RIDE BOOKED", // Change the category to "RIDE BOOKED"
+        };
+
+        // Add to the Accepted list
+        mockOrders.Accepted = [...mockOrders.Accepted, updatedRide];
+      }
+
+      // Switch to the Accepted tab
+      setActiveTab("Accepted");
+
       // Update toast to success
       toast.update(loadingToast, {
         render: "Ride accepted successfully!",
         type: "success",
         isLoading: false,
-        autoClose: 5000
+        autoClose: 5000,
       });
-      
-      // Optionally, you might want to add this ride to an "active rides" list
-      // or switch to a different tab
-      
     } catch (error) {
       console.error("Error accepting ride:", error);
-      
+
       // Update toast to show error
       toast.update(loadingToast, {
-        render: `Failed to accept ride: ${error instanceof Error ? error.message : "Unknown error"}`,
+        render: `Failed to accept ride: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`,
         type: "error",
         isLoading: false,
-        autoClose: 5000
+        autoClose: 5000,
       });
     }
   };
+
 
   const handleReject = (id: string) => {
     if (wsService) {
@@ -185,7 +194,7 @@ export default function Drive() {
         pauseOnFocusLoss
         draggable
         pauseOnHover
-        theme="dark" // Using built-in dark theme as base
+        theme="dark"
         toastStyle={{
           background: "#222222",
           color: "#ffffff",
@@ -217,9 +226,8 @@ export default function Drive() {
               />
             )}
           </div>
-          <MapPlaceholder />
+          <MapPlaceholder selectedRide={selectedOrder} />
         </div>
-        
       </div>
     </>
   );

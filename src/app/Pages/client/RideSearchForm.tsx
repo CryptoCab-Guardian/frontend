@@ -5,15 +5,14 @@ import React, { useState, useCallback, useEffect } from 'react';
 export type VehicleType = {
   id: string;
   name: string;
-  basePrice: number;
 };
 
 const vehicleTypes: VehicleType[] = [
-  { id: 'sedan', name: 'Sedan', basePrice: 1.5 },
-  { id: 'suv', name: 'SUV', basePrice: 2.0 },
-  { id: 'luxury', name: 'Luxury', basePrice: 3.0 },
-  { id: 'mini', name: 'Mini', basePrice: 1.0 },
-  { id: 'van', name: 'Van', basePrice: 2.5 }
+  { id: 'sedan', name: 'Sedan' },
+  { id: 'suv', name: 'SUV'},
+  { id: 'luxury', name: 'Luxury'},
+  { id: 'mini', name: 'Mini'},
+  { id: 'van', name: 'Van'}
 ];
 
 interface RideSearchFormProps {
@@ -28,7 +27,7 @@ const RideSearchForm: React.FC<RideSearchFormProps> = ({ onSearch }) => {
   const [isLoadingTo, setIsLoadingTo] = useState(false);
   const [isLoadingCurrentLocation, setIsLoadingCurrentLocation] = useState(true);
   const [error, setError] = useState("");
-  const [currentLocationCoords, setCurrentLocationCoords] = useState<{lat: number, lng: number} | null>(null);
+  const [, setCurrentLocationCoords] = useState<{lat: number, lng: number} | null>(null);
 
   // Get user's current location when component mounts
   useEffect(() => {
@@ -163,6 +162,7 @@ const RideSearchForm: React.FC<RideSearchFormProps> = ({ onSearch }) => {
           const address = await getAddressFromCoordinates(latitude, longitude);
           setFrom(address || `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
         } catch (error) {
+          console.error("Error getting address:", error);
           setFrom(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
         }
         
@@ -272,7 +272,7 @@ const RideSearchForm: React.FC<RideSearchFormProps> = ({ onSearch }) => {
           >
             {vehicleTypes.map((type) => (
               <option key={type.id} value={type.id}>
-                {type.name} - ${type.basePrice.toFixed(2)}/km
+                {type.name}
               </option>
             ))}
           </select>

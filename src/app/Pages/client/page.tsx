@@ -8,11 +8,13 @@ import WalletDisplay from "./WalletDisplay";
 import RideSearchForm from "./RideSearchForm";
 import VehicleList from "./VehicleList";
 import MapPlaceholder from "./MapPlaceHolder";
+import { useRouter } from "next/navigation";
 
 const Rider = () => {
   const [showVehicles, setShowVehicles] = useState(false);
   const [filteredCars, setFilteredCars] = useState(mockCars);
   const { currentAccount, balance, initializeWeb3 } = useAuth();
+  const router = useRouter();
 
   // Location state variables
   const [pickupLocation, setPickupLocation] = useState<{
@@ -29,6 +31,11 @@ const Rider = () => {
   const [price, setPrice] = useState<string>();
   const [routeGeometry, setRouteGeometry] = useState<string>("");
 
+  // Active ride notification state
+  const [activeRideId, setActiveRideId] = useState<string | null>(null);
+  const [activeDriverId, setActiveDriverId] = useState<string | null>(null);
+  const [showDriverNotification, setShowDriverNotification] = useState(false);
+
   // Initialize wallet
   useEffect(() => {
     if (currentAccount) {
@@ -40,14 +47,101 @@ const Rider = () => {
     }
   }, [currentAccount, initializeWeb3]);
 
+  
+
+
+  // Check for active rides on component mount and whenever dependencies change
+useEffect(() => {
+  const checkForActiveRide = () => {
+    const storedRideId = localStorage.getItem("activeRideId");
+    const storedDriverId = localStorage.getItem("activeDriverId");
+
+    console.log("Checking for active ride:", {
+      storedRideId,
+      storedDriverId,
+    });
+
+   
+    if (storedRideId || storedDriverId) {
+      setActiveRideId(storedRideId);
+      setActiveDriverId(storedDriverId);
+      setShowDriverNotification(true);
+    } else {
+      setShowDriverNotification(false);
+    }
+  };
+
+  // Check immediately when component mounts
+  checkForActiveRide();
+
+  // Set up interval to periodically check
+  const intervalId = setInterval(checkForActiveRide, 5000);
+
+  // Also set up a listener for storage changes (in case another tab updates it)
+  window.addEventListener("storage", checkForActiveRide);
+
+  // Clean up
+  return () => {
+    clearInterval(intervalId);
+    window.removeEventListener("storage", checkForActiveRide);
+  };
+}, []);
+
+
+
+
+// Also watch for changes in activeRideId and activeDriverId state
+useEffect(() => {
+
+  if (activeRideId || activeDriverId) {
+    setShowDriverNotification(true);
+  } else {
+    setShowDriverNotification(false);
+  }
+}, [activeRideId, activeDriverId]);
+
+
+
+
+
+// Handle when a ride gets booked and driver is assigned
+const handleRideBooked = (rideId: string, driverId: string) => {
+  console.log("Ride booked with driver:", { rideId, driverId });
+  
+  // Store in state
+  setActiveRideId(rideId);
+  setActiveDriverId(driverId);
+  
+  // Always show notification immediately when a ride is booked
+  setShowDriverNotification(true);
+  
+  // Also ensure values are in localStorage
+  localStorage.setItem("activeRideId", rideId);
+  localStorage.setItem("activeDriverId", driverId);
+};
+
+  // Navigate to ride details page
+  const handleViewRideDetails = () => {
+    if (activeRideId) {
+      router.push(`/Pages/client/${activeRideId}`);
+    }
+  };
+
   // Calculate price based on distance
   useEffect(() => {
     if (distance) {
-      // Simple pricing model: Base fare + rate per km
-      const baseFare = 5; // $5 base fare
-      const ratePerKm = 1.5; // $1.5 per km
+      const baseFare = 50; 
+      const ratePerKm = 15; 
       const calculatedPrice = baseFare + distance * ratePerKm;
-      setPrice(`$${calculatedPrice.toFixed(2)}`);
+
+      // Format with Indian Rupee symbol and thousands separator
+      const formattedPrice = new Intl.NumberFormat("en-IN", {
+        style: "currency",
+        currency: "INR",
+        maximumFractionDigits: 0, 
+      }).format(calculatedPrice);
+
+      setPrice(formattedPrice);
     }
   }, [distance]);
 
@@ -81,6 +175,8 @@ const Rider = () => {
     console.log("Filtered cars:", filtered);
     setFilteredCars(filtered);
     setShowVehicles(true);
+
+
 
     // Get coordinates for both locations
     try {
@@ -126,6 +222,9 @@ const Rider = () => {
           dropoff.lng
         );
 
+
+
+
         try {
           // Get actual route distance using OSRM API
           const routeResponse = await fetch(
@@ -161,6 +260,9 @@ const Rider = () => {
     }
   };
 
+
+
+
   // Calculate distance between two points using Haversine formula
   const calculateDistance = (
     lat1: number,
@@ -186,6 +288,9 @@ const Rider = () => {
     return deg * (Math.PI / 180);
   };
 
+
+
+
   return (
     <>
       <Navbar />
@@ -204,8 +309,25 @@ const Rider = () => {
                   vehicles={filteredCars}
                   showList={showVehicles}
                   selectedPrice={price}
-                  pickupLocation={pickupLocation ? { ...pickupLocation, lat: pickupLocation.lat.toString(), lng: pickupLocation.lng.toString() } : undefined} 
-                  dropoffLocation={dropoffLocation ? { ...dropoffLocation, lat: dropoffLocation.lat.toString(), lng: dropoffLocation.lng.toString() } : undefined} 
+                  pickupLocation={
+                    pickupLocation
+                      ? {
+                          ...pickupLocation,
+                          lat: pickupLocation.lat.toString(),
+                          lng: pickupLocation.lng.toString(),
+                        }
+                      : undefined
+                  }
+                  dropoffLocation={
+                    dropoffLocation
+                      ? {
+                          ...dropoffLocation,
+                          lat: dropoffLocation.lat.toString(),
+                          lng: dropoffLocation.lng.toString(),
+                        }
+                      : undefined
+                  }
+                  onRideBooked={handleRideBooked}
                 />
               </div>
             </div>
@@ -221,6 +343,31 @@ const Rider = () => {
             </div>
           </div>
         </div>
+
+        {/* Driver notification - always visible when a ride is active */}
+        {showDriverNotification && (
+          <div
+            onClick={handleViewRideDetails}
+            className="fixed top-24 left-1 bg-black text-white px-5 py-3 rounded-lg shadow-lg z-[9999] flex items-center space-x-3 cursor-pointer hover:bg-gray-800 transition-colors"
+          >
+            <div className="rounded-full bg-green-500 h-8 w-8 flex items-center justify-center">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6z" />
+              </svg>
+            </div>
+            <div>
+              <p className="font-semibold">Driver is on the way!</p>
+              <p className="text-sm opacity-80">
+                About 5 minutes away. Tap for details
+              </p>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );

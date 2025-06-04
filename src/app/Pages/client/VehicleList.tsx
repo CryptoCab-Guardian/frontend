@@ -19,12 +19,13 @@ interface Coordinates {
   lng: string;
 }
 
-interface VehicleListProps {
+export interface VehicleListProps {
   vehicles: Vehicle[];
   showList: boolean;
   selectedPrice?: string;
   pickupLocation?: Coordinates;
   dropoffLocation?: Coordinates;
+  onRideBooked?: (rideId: string, driverId: string) => void;
 }
 
 
