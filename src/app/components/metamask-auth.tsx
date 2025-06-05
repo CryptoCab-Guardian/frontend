@@ -1,4 +1,3 @@
-
 "use client";
 import { useEffect, useState } from "react";
 import Web3 from "web3";
@@ -13,7 +12,7 @@ declare global {
   }
 }
 
-export default function MetaMaskAuth({ onClose, onAuthSuccess }: { onClose: () => void, onAuthSuccess: () => void }) {
+export function MetaMaskAuth({ onClose, onAuthSuccess }: { onClose: () => void, onAuthSuccess: () => void }) {
   const [accounts, setAccounts] = useState<Array<string>>([]);
   const [currentAccount, setCurrentAccount] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -74,7 +73,7 @@ export default function MetaMaskAuth({ onClose, onAuthSuccess }: { onClose: () =
     if (currentAccount) {
       setTimeout(() => {
         onClose();
-        onAuthSuccess(); 
+        onAuthSuccess();
       }, 3000);
     }
   }, [currentAccount, onClose, onAuthSuccess]);

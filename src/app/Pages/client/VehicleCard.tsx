@@ -166,8 +166,6 @@ const VehicleCard: React.FC<VehicleCardProps> = ({
         vehicleType: vehicle.category
       };
 
-      console.log("Request body:", requestBody);
-
       const response = await fetch(
         `http://localhost:7777/bookRide/${currentAccount}`,
         {
@@ -198,7 +196,8 @@ const VehicleCard: React.FC<VehicleCardProps> = ({
       });
 
       pollRideStatus(bookingToast, newRideId);
-    } catch (error) {
+    }
+    catch (error) {
       console.error("Error booking ride:", error);
       toast.error(
         `Failed to book ride: ${

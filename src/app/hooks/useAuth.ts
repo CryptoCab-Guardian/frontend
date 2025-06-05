@@ -1,38 +1,3 @@
-// // hooks/useAuth.ts
-// "use client";
-// import { create } from 'zustand';
-
-// interface AuthState {
-//   isConnected: boolean;
-//   currentAccount: string | null;
-//   userRole: string | null;
-//   setConnected: (account: string) => void;
-//   setDisconnected: () => void;
-//   setUserRole: (role: string) => void;
-// }
-
-// export const useAuth = create<AuthState>((set) => ({
-//   isConnected: false,
-//   currentAccount: null,
-//   userRole: null,
-//   setConnected: (account: string) => {
-//     localStorage.setItem('connectedAccount', account);
-//     localStorage.setItem('walletConnected', 'true');
-//     set({ isConnected: true, currentAccount: account });
-//   },
-//   setDisconnected: () => {
-//     localStorage.removeItem('connectedAccount');
-//     localStorage.removeItem('walletConnected');
-//     localStorage.removeItem('userRole');
-//     set({ isConnected: false, currentAccount: null, userRole: null });
-//   },
-//   setUserRole: (role: string) => {
-//     localStorage.setItem('userRole', role);
-//     set({ userRole: role });
-//   },
-// }));
-
-
 "use client";
 import { create } from 'zustand';
 import Web3 from 'web3';

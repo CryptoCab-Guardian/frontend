@@ -47,78 +47,78 @@ const Rider = () => {
     }
   }, [currentAccount, initializeWeb3]);
 
-  
+
 
 
   // Check for active rides on component mount and whenever dependencies change
-useEffect(() => {
-  const checkForActiveRide = () => {
-    const storedRideId = localStorage.getItem("activeRideId");
-    const storedDriverId = localStorage.getItem("activeDriverId");
+  useEffect(() => {
+    const checkForActiveRide = () => {
+      const storedRideId = localStorage.getItem("activeRideId");
+      const storedDriverId = localStorage.getItem("activeDriverId");
 
-    console.log("Checking for active ride:", {
-      storedRideId,
-      storedDriverId,
-    });
+      // console.log("Checking for active ride:", {
+      //   storedRideId,
+      //   storedDriverId,
+      // });
 
-   
-    if (storedRideId || storedDriverId) {
-      setActiveRideId(storedRideId);
-      setActiveDriverId(storedDriverId);
+
+      if (storedRideId || storedDriverId) {
+        setActiveRideId(storedRideId);
+        setActiveDriverId(storedDriverId);
+        setShowDriverNotification(true);
+      } else {
+        setShowDriverNotification(false);
+      }
+    };
+
+    // Check immediately when component mounts
+    checkForActiveRide();
+
+    // Set up interval to periodically check
+    const intervalId = setInterval(checkForActiveRide, 5000);
+
+    // Also set up a listener for storage changes (in case another tab updates it)
+    window.addEventListener("storage", checkForActiveRide);
+
+    // Clean up
+    return () => {
+      clearInterval(intervalId);
+      window.removeEventListener("storage", checkForActiveRide);
+    };
+  }, []);
+
+
+
+
+  // Also watch for changes in activeRideId and activeDriverId state
+  useEffect(() => {
+
+    if (activeRideId || activeDriverId) {
       setShowDriverNotification(true);
     } else {
       setShowDriverNotification(false);
     }
-  };
-
-  // Check immediately when component mounts
-  checkForActiveRide();
-
-  // Set up interval to periodically check
-  const intervalId = setInterval(checkForActiveRide, 5000);
-
-  // Also set up a listener for storage changes (in case another tab updates it)
-  window.addEventListener("storage", checkForActiveRide);
-
-  // Clean up
-  return () => {
-    clearInterval(intervalId);
-    window.removeEventListener("storage", checkForActiveRide);
-  };
-}, []);
+  }, [activeRideId, activeDriverId]);
 
 
 
 
-// Also watch for changes in activeRideId and activeDriverId state
-useEffect(() => {
 
-  if (activeRideId || activeDriverId) {
+  // Handle when a ride gets booked and driver is assigned
+  const handleRideBooked = (rideId: string, driverId: string) => {
+    console.log("Ride booked with driver:", { rideId, driverId });
+
+    // Store in state
+    setActiveRideId(rideId);
+    setActiveDriverId(driverId);
+
+    // Always show notification immediately when a ride is booked
     setShowDriverNotification(true);
-  } else {
-    setShowDriverNotification(false);
-  }
-}, [activeRideId, activeDriverId]);
 
-
-
-
-
-// Handle when a ride gets booked and driver is assigned
-const handleRideBooked = (rideId: string, driverId: string) => {
-  console.log("Ride booked with driver:", { rideId, driverId });
-  
-  // Store in state
-  setActiveRideId(rideId);
-  setActiveDriverId(driverId);
-  
-  // Always show notification immediately when a ride is booked
-  setShowDriverNotification(true);
-  
-  // Also ensure values are in localStorage
-  localStorage.setItem("activeRideId", rideId);
-  localStorage.setItem("activeDriverId", driverId);
-};
+    // Also ensure values are in localStorage
+    localStorage.setItem("activeRideId", rideId);
+    localStorage.setItem("activeDriverId", driverId);
+  };
 
   // Navigate to ride details page
   const handleViewRideDetails = () => {
@@ -130,15 +130,15 @@ const handleRideBooked = (rideId: string, driverId: string) => {
   // Calculate price based on distance
   useEffect(() => {
     if (distance) {
-      const baseFare = 50; 
-      const ratePerKm = 15; 
+      const baseFare = 50;
+      const ratePerKm = 15;
       const calculatedPrice = baseFare + distance * ratePerKm;
 
       // Format with Indian Rupee symbol and thousands separator
       const formattedPrice = new Intl.NumberFormat("en-IN", {
         style: "currency",
         currency: "INR",
-        maximumFractionDigits: 0, 
+        maximumFractionDigits: 0,
       }).format(calculatedPrice);
 
       setPrice(formattedPrice);
@@ -276,9 +276,9 @@ const handleRideBooked = (rideId: string, driverId: string) => {
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos(deg2rad(lat1)) *
-        Math.cos(deg2rad(lat2)) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
+      Math.cos(deg2rad(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     const distance = R * c; // Distance in km
     return distance;
@@ -312,19 +312,19 @@ const handleRideBooked = (rideId: string, driverId: string) => {
                   pickupLocation={
                     pickupLocation
                       ? {
-                          ...pickupLocation,
-                          lat: pickupLocation.lat.toString(),
-                          lng: pickupLocation.lng.toString(),
-                        }
+                        ...pickupLocation,
+                        lat: pickupLocation.lat.toString(),
+                        lng: pickupLocation.lng.toString(),
+                      }
                       : undefined
                   }
                   dropoffLocation={
                     dropoffLocation
                       ? {
-                          ...dropoffLocation,
-                          lat: dropoffLocation.lat.toString(),
-                          lng: dropoffLocation.lng.toString(),
-                        }
+                        ...dropoffLocation,
+                        lat: dropoffLocation.lat.toString(),
+                        lng: dropoffLocation.lng.toString(),
+                      }
                       : undefined
                   }
                   onRideBooked={handleRideBooked}
