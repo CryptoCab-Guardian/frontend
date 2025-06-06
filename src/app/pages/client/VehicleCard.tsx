@@ -192,7 +192,7 @@ export default function VehicleCard({ vehicle, selectedPrice, pickupLocation, dr
 
 			const data = await response.json();
 			const rideId = data.rideId;
-
+			localStorage.setItem("vehicleType",vehicle.category);
 			toast.update(bookingToast, {
 				render: "Ride booked! Looking for a driver...",
 				type: "info",

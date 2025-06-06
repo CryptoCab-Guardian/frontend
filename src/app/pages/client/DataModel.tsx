@@ -74,7 +74,7 @@ export const mockCars: Vehicle[] = [
     id: "C007",
     category: "SUV",
     price: "₹100",
-    pickupAddress: "Hindmotor, Uttarpara Kotrung, Serampur Uttarpara, Hooghly, West Bengal, 712232, India",
+    pickupAddress: "Strand Road, B. B. D. Bagh, Kolkata, West Bengal, 700021, India",
     dropAddress: "Eden Garden Park, Esplanade, Kolkata",
     description: "Rides that welcome you and your furry friend",
     capacity: 6,

@@ -31,7 +31,7 @@ const Rider = () => {
   const [price, setPrice] = useState<string>();
   const [routeGeometry, setRouteGeometry] = useState<string>("");
 
-  // Active ride notification state
+  
   const [activeRideId, setActiveRideId] = useState<string | null>(null);
   const [activeDriverId, setActiveDriverId] = useState<string | null>(null);
   const [showDriverNotification, setShowDriverNotification] = useState(false);
@@ -71,16 +71,13 @@ const Rider = () => {
       }
     };
 
-    // Check immediately when component mounts
+    
     checkForActiveRide();
 
-    // Set up interval to periodically check
     const intervalId = setInterval(checkForActiveRide, 5000);
 
-    // Also set up a listener for storage changes (in case another tab updates it)
     window.addEventListener("storage", checkForActiveRide);
 
-    // Clean up
     return () => {
       clearInterval(intervalId);
       window.removeEventListener("storage", checkForActiveRide);
@@ -88,9 +85,6 @@ const Rider = () => {
   }, []);
 
 
-
-
-  // Also watch for changes in activeRideId and activeDriverId state
   useEffect(() => {
 
     if (activeRideId || activeDriverId) {
@@ -103,16 +97,12 @@ const Rider = () => {
 
 
 
-
-  // Handle when a ride gets booked and driver is assigned
   const handleRideBooked = (rideId: string, driverId: string) => {
     console.log("Ride booked with driver:", { rideId, driverId });
 
     // Store in state
     setActiveRideId(rideId);
     setActiveDriverId(driverId);
-
-    // Always show notification immediately when a ride is booked
     setShowDriverNotification(true);
 
     // Also ensure values are in localStorage
@@ -120,21 +110,18 @@ const Rider = () => {
     localStorage.setItem("activeDriverId", driverId);
   };
 
-  // Navigate to ride details page
   const handleViewRideDetails = () => {
     if (activeRideId) {
       router.push(`/pages/client/${activeRideId}`);
     }
   };
 
-  // Calculate price based on distance
   useEffect(() => {
     if (distance) {
       const baseFare = 50;
       const ratePerKm = 15;
       const calculatedPrice = baseFare + distance * ratePerKm;
 
-      // Format with Indian Rupee symbol and thousands separator
       const formattedPrice = new Intl.NumberFormat("en-IN", {
         style: "currency",
         currency: "INR",
@@ -214,7 +201,6 @@ const Rider = () => {
         setPickupLocation(pickup);
         setDropoffLocation(dropoff);
 
-        // Calculate straight-line distance as fallback
         const straightLineDistance = calculateDistance(
           pickup.lat,
           pickup.lng,
@@ -238,10 +224,8 @@ const Rider = () => {
             console.log("Route distance:", routeDistanceKm, "km");
             setDistance(routeDistanceKm);
 
-            // Store the route geometry for the map
             setRouteGeometry(routeData.routes[0].geometry);
           } else {
-            // Fallback to straight-line distance
             console.log(
               "Using straight-line distance:",
               straightLineDistance,
@@ -251,7 +235,6 @@ const Rider = () => {
           }
         } catch (routeError) {
           console.error("Error calculating route:", routeError);
-          // Fallback to straight-line distance
           setDistance(straightLineDistance);
         }
       }
@@ -363,7 +346,7 @@ const Rider = () => {
             <div>
               <p className="font-semibold">Driver is on the way!</p>
               <p className="text-sm opacity-80">
-                About 5 minutes away. Tap for details
+                About less than a minute away. Tap for details
               </p>
             </div>
           </div>
