@@ -123,7 +123,7 @@ const Rider = () => {
   // Navigate to ride details page
   const handleViewRideDetails = () => {
     if (activeRideId) {
-      router.push(`/Pages/client/${activeRideId}`);
+      router.push(`/pages/client/${activeRideId}`);
     }
   };
 

@@ -4,7 +4,7 @@ import Navbar from "@/app/Navbar";
 import React, { useEffect, useState } from "react";
 import Web3 from "web3";
 
-const UberWalletPage = () => {
+const WalletPage = () => {
   const [accountType, setAccountType] = useState(""); 
   const [currentAccount, setCurrentAccount] = useState<string | null>(null);
   const [balance, setBalance] = useState<string>(""); 
@@ -65,7 +65,7 @@ const UberWalletPage = () => {
             </p>
             <div className="mt-4">
               <label className="text-gray-600 text-md font-bold">Network Type</label>
-              <p className="text-gray-100 text-md mt-1 bg-black p-1 rounded-md w-1/4 flex justify-center items-center">{accountType || "Unknown"}</p>
+              <p className="text-gray-100 text-md mt-1 bg-black py-1.5 px-5 rounded-md w-fit">{accountType || "---"}</p>
             </div>
           </div>
 
@@ -80,7 +80,4 @@ const UberWalletPage = () => {
   );
 };
 
-export default UberWalletPage;
-
-
-
+export default WalletPage;

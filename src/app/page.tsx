@@ -41,17 +41,10 @@ const DriverPage = () => {
 
             <div className="flex flex-wrap items-center gap-4 mb-10">
               <Link
-                href="/sign-up"
+                href="/pages/login"
                 className="inline-block px-8 py-3 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
               >
                 Get started
-              </Link>
-
-              <Link
-                href="/sign-in"
-                className="inline-block text-black hover:underline"
-              >
-                Already have an account? Sign in
               </Link>
             </div>
           </div>

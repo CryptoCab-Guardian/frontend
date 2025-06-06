@@ -39,7 +39,6 @@ const RideSearchForm: React.FC<RideSearchFormProps> = ({ onSearch }) => {
           navigator.geolocation.getCurrentPosition(
             async (position) => {
               const { latitude, longitude } = position.coords;
-              console.log("Current location:", latitude, longitude);
               setCurrentLocationCoords({ lat: latitude, lng: longitude });
               
               // Use reverse geocoding to get address from coordinates

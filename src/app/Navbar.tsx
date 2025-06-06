@@ -39,20 +39,20 @@ const Navbar = () => {
       {/* Navigation Links */}
       <div className="hidden md:flex space-x-6">
         <Link 
-          href="/Pages/Login"
+          href="/pages/login"
           className="hover:text-gray-300 transition-colors"
         >
           Ride
         </Link>
         <Link 
-          href="/Pages/Login"
+          href="/pages/login"
           className="hover:text-gray-300 transition-colors"
         >
           Drive
         </Link>
         {isConnected && (
           <Link 
-            href="/Pages/Wallet" 
+            href="/pages/wallet" 
             className="hover:text-gray-300 transition-colors"
           >
             Wallet
@@ -64,7 +64,7 @@ const Navbar = () => {
       <div className="flex items-center space-x-4">
         {!isConnected ? (
           <Link 
-            href="/Pages/Login"
+            href="/pages/login"
             className="px-4 py-2 rounded-full bg-white text-black hover:bg-gray-200 transition-colors"
           >
             Log in
