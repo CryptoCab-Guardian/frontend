@@ -72,10 +72,18 @@ export default function VehicleCard({ vehicle, selectedPrice, pickupLocation, dr
 					localStorage.setItem("activeRideId", rideId);
 					localStorage.setItem("activeDriverId", driverId);
 
-					// driverPosition: {
-        			// 	longitude: "87.87378877401351929",
-        			// 	latitude: "23.23594475301145934"
-					// }		
+					// {
+    				// 	"status": "ASSIGNED",
+    				// 	"src": "Burdwan Municipal Girls School, Kachari Road, Bamakalitala, Badamtala, Bardhaman, Burdwan - I, Purba Bardhaman, West Bengal, 713101, India",
+    				// 	"dest": "BC Road, Bamakalitala, Badamtala, Bardhaman, Burdwan - I, Purba Bardhaman, West Bengal, 713101, India",
+    				// 	"price": "₹69",
+    				// 	"driverId": "0x0Ca70C9069ffacEf17b92eC81f413F76fB775711",
+    				// 	"rideId": "faf9ed5c-d41a-450b-8a69-3fddfaf0191d",
+    				// 	"driverPosition": {
+        			// 		"longitude": "87.87377268075942993",
+        			// 		"latitude": "23.2359219405210311"
+    				// 	}
+					// }	
 
 					// Update toast with success message
 					toast.update(toastId, {

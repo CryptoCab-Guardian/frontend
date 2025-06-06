@@ -4,7 +4,7 @@ import BookVehicle from "@/app/components/book_vehicle/BookVehicle";
 interface RideListProps {
 	orders: Order[];
 	activeTab: string;
-	onAccept: (id: string) => void;
+	onAccept: (id: string, src: string, dest: string, price: string) => void;
 	onReject: (id: string) => void;
 	onSelect: (order: Order) => void;
 }
@@ -20,7 +20,7 @@ export function RideList({ orders, activeTab, onAccept, onReject, onSelect }: Ri
 					<BookVehicle
 						key={order.id}
 						order={order}
-						onAccept={() => onAccept(order.id)}
+						onAccept={() => onAccept(order.id, order.pickupAddress, order.dropAddress, order.price)}
 						onReject={() => onReject(order.id)}
 						onSelect={() => onSelect(order)}
 						showActions={activeTab === "Upcoming"}

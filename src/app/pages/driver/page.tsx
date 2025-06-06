@@ -90,8 +90,7 @@ export default function Drive() {
 		};
 	}, [currentAccount]);
 
-	const handleAccept = async (id: string) => {
-		console.log("Ride accept", id);
+	const handleAccept = async (id: string, src: string, dest: string, price: string) => {
 		if (!currentAccount) {
 			toast.error("You must be logged in to accept rides");
 			return;
@@ -101,7 +100,6 @@ export default function Drive() {
 		const loadingToast = toast.loading("Accepting ride...");
 
 		try {
-			// Make a POST request to accept the ride
 			const response = await fetch(
 				`http://localhost:7777/acceptRideByDriver/${currentAccount}/${id}`,
 				{
@@ -109,6 +107,11 @@ export default function Drive() {
 					headers: {
 						"Content-Type": "application/json",
 					},
+					body: JSON.stringify({
+						src,
+						dest,
+						price
+					})
 				}
 			);
 

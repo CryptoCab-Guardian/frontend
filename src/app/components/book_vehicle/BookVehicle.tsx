@@ -16,14 +16,13 @@ type Order = {
 
 interface BookVehicleProps {
 	order: Order;
-	onAccept: (id: string) => void;
+	onAccept: (id: string, src: string, dest: string, price: string) => void;
 	onReject: (id: string) => void;
 	showActions: boolean;
 	onSelect: () => void;
 }
 
 function BookVehicle({ order, onAccept, onReject, showActions, onSelect }: BookVehicleProps) {
-	console.log("Order Details:", order);
 	const [isLiked, setIsLiked] = useState(false);
 	const [isRejected, setIsRejected] = useState(false);
 	const [showDialog, setShowDialog] = useState(false);
@@ -41,7 +40,7 @@ function BookVehicle({ order, onAccept, onReject, showActions, onSelect }: BookV
 
 	const handleAccept = () => {
 		setIsLiked(true);
-		onAccept(order.id);
+		onAccept(order.id, order.pickupAddress, order.dropAddress, order.price);
 		setShowDialog(false);
 	};
 
