@@ -1,4 +1,4 @@
-import { WebSocketMessage} from './types';
+import { WebSocketMessage } from './types';
 import { toast } from 'react-toastify';
 const WEBSOCKET_URL = 'ws://localhost:7777';
 
@@ -10,14 +10,19 @@ export class WebSocketService {
     private onMessage: (data: WebSocketMessage) => void,
     private onError: (error: Event) => void,
     private driverId?: string
-  ) {}
+  ) { }
 
   connect() {
     this.ws = new WebSocket(WEBSOCKET_URL);
 
     this.ws.onopen = () => {
       console.log('WebSocket Connected');
-      
+
+      // Notify about connection establishment
+      this.onMessage({
+        type: 'CONNECTION_ESTABLISHED'
+      });
+
       // Send IDENTIFY message when connection opens
       if (this.driverId) {
         this.send({
@@ -31,7 +36,7 @@ export class WebSocketService {
       try {
         const data = JSON.parse(event.data);
         console.log('Received WebSocket message:', data);
-        
+
         if (data.type === 'NEW_RIDE_REQUEST') {
           toast.info("A new ride request", {
             position: "top-right",
@@ -42,7 +47,7 @@ export class WebSocketService {
             draggable: true
           });
         }
-        
+
         this.onMessage(data);
       } catch (error) {
         console.error('Error processing message:', error);
@@ -82,5 +87,5 @@ export class WebSocketService {
       this.ws = null;
     }
   }
-  
+
 }

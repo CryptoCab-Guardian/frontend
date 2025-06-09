@@ -12,8 +12,14 @@ import {
   FaInfoCircle,
   FaMoneyBillWave,
   FaRoute,
+  FaCreditCard,
+  FaReceipt,
 } from "react-icons/fa";
 import Navbar from "@/app/Navbar";
+import PaymentModal from "@/app/components/PaymentModal";
+import TransactionInfo from "@/app/components/TransactionInfo";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 
 const StatusBadge = ({ status }: { status: string }) => {
@@ -73,6 +79,9 @@ interface RideData {
   }
   rideId: string;
   vehicleType?: string;
+  paymentStatus?: string;
+  paymentTxHash?: string;
+  paymentChainId?: string;
 }
 
 const RideID = () => {
@@ -85,12 +94,16 @@ const RideID = () => {
   const [error, setError] = useState<string | null>(null);
   const [estimatedTime, setEstimatedTime] = useState<string>("Calculating...");
   const [distance, setDistance] = useState<string>("");
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [paymentComplete, setPaymentComplete] = useState(false);
+  const [selectedChainId, setSelectedChainId] = useState<string>('0xaa36a7'); // Default to Sepolia testnet
+  const [isLoading, setIsLoading] = useState(false);
+  const [txHash, setTxHash] = useState<string>("");
 
-  
   const rideId = params?.activeRide as string;
   const searchRideId = searchParams.get("rideId");
 
-  
+
   const activeRideId = rideId || searchRideId;
 
   useEffect(() => {
@@ -138,127 +151,127 @@ const RideID = () => {
 
   // Calculate time and distance from driver to pickup
   // Updated function to calculate time and distance using client's current location
-const calculateTimeAndDistance = async (
-  driverLat: number,
-  driverLng: number
-) => {
-  try {
-    // Get the client's current location using browser geolocation
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const clientLat = position.coords.latitude;
-        const clientLng = position.coords.longitude;
-        
-        // Calculate straight line distance (in km)
-        const distanceInKm = calculateDistance(
-          driverLat,
-          driverLng,
-          clientLat,
-          clientLng
-        );
-        
-        // Add 30% to account for real road routes vs straight line
-        const roadDistance = distanceInKm * 1.3;
-        
-        // Set the distance in the UI
-        setDistance(formatDistance(roadDistance));
-        
-        // Calculate time based on 50 km/h driving speed
-        const SPEED_KM_PER_HOUR = 50;
-        const timeInHours = roadDistance / SPEED_KM_PER_HOUR;
-        const timeInMinutes = Math.round(timeInHours * 60);
-        
-        // Format the estimated time
-        if (timeInMinutes < 1) {
-          setEstimatedTime("Less than a minute");
-        } else if (timeInMinutes === 1) {
-          setEstimatedTime("1 minute");
-        } else if (timeInMinutes < 60) {
-          setEstimatedTime(`${timeInMinutes} minutes`);
-        } else {
-          const hours = Math.floor(timeInMinutes / 60);
-          const minutes = timeInMinutes % 60;
-          setEstimatedTime(`${hours} hr ${minutes} min`);
-        }
-      },
-      (error) => {
-        console.error("Geolocation error:", error);
-        // Fall back to geocoding if geolocation fails
-        geocodeDestinationAndCalculate(driverLat, driverLng);
-      },
-      { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
-    );
-  } catch (error) {
-    console.error("Error calculating estimated time:", error);
-    setEstimatedTime("5-10 minutes");
-    setDistance("~3 km");
-  }
-};
+  const calculateTimeAndDistance = async (
+    driverLat: number,
+    driverLng: number
+  ) => {
+    try {
+      // Get the client's current location using browser geolocation
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const clientLat = position.coords.latitude;
+          const clientLng = position.coords.longitude;
 
-// Fallback function to use the destination address if geolocation fails
-const geocodeDestinationAndCalculate = async (
-  driverLat: number,
-  driverLng: number
-) => {
-  try {
-    if (!rideData?.src) {
-      throw new Error("No source address available");
+          // Calculate straight line distance (in km)
+          const distanceInKm = calculateDistance(
+            driverLat,
+            driverLng,
+            clientLat,
+            clientLng
+          );
+
+          // Add 30% to account for real road routes vs straight line
+          const roadDistance = distanceInKm * 1.3;
+
+          // Set the distance in the UI
+          setDistance(formatDistance(roadDistance));
+
+          // Calculate time based on 50 km/h driving speed
+          const SPEED_KM_PER_HOUR = 50;
+          const timeInHours = roadDistance / SPEED_KM_PER_HOUR;
+          const timeInMinutes = Math.round(timeInHours * 60);
+
+          // Format the estimated time
+          if (timeInMinutes < 1) {
+            setEstimatedTime("Less than a minute");
+          } else if (timeInMinutes === 1) {
+            setEstimatedTime("1 minute");
+          } else if (timeInMinutes < 60) {
+            setEstimatedTime(`${timeInMinutes} minutes`);
+          } else {
+            const hours = Math.floor(timeInMinutes / 60);
+            const minutes = timeInMinutes % 60;
+            setEstimatedTime(`${hours} hr ${minutes} min`);
+          }
+        },
+        (error) => {
+          console.error("Geolocation error:", error);
+          // Fall back to geocoding if geolocation fails
+          geocodeDestinationAndCalculate(driverLat, driverLng);
+        },
+        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+      );
+    } catch (error) {
+      console.error("Error calculating estimated time:", error);
+      setEstimatedTime("5-10 minutes");
+      setDistance("~3 km");
     }
-    
-    // Geocode the destination address to get coordinates
-    const geocodeResponse = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-        rideData.src
-      )}&limit=1`
-    );
+  };
 
-    if (!geocodeResponse.ok) {
-      throw new Error("Geocoding failed");
+  // Fallback function to use the destination address if geolocation fails
+  const geocodeDestinationAndCalculate = async (
+    driverLat: number,
+    driverLng: number
+  ) => {
+    try {
+      if (!rideData?.src) {
+        throw new Error("No source address available");
+      }
+
+      // Geocode the destination address to get coordinates
+      const geocodeResponse = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+          rideData.src
+        )}&limit=1`
+      );
+
+      if (!geocodeResponse.ok) {
+        throw new Error("Geocoding failed");
+      }
+
+      const geocodeData = await geocodeResponse.json();
+      if (!geocodeData || !geocodeData.length) {
+        throw new Error("Location not found");
+      }
+
+      const destLat = parseFloat(geocodeData[0].lat);
+      const destLng = parseFloat(geocodeData[0].lon);
+
+      // Calculate straight line distance (in km)
+      const distanceInKm = calculateDistance(
+        driverLat,
+        driverLng,
+        destLat,
+        destLng
+      );
+
+      const roadDistance = distanceInKm * 1.3;
+      setDistance(formatDistance(roadDistance));
+
+      // Calculate time based on 50 km/h driving speed
+      const SPEED_KM_PER_HOUR = 50;
+      const timeInHours = roadDistance / SPEED_KM_PER_HOUR;
+      const timeInMinutes = Math.round(timeInHours * 60);
+
+      if (timeInMinutes < 1) {
+        setEstimatedTime("Less than a minute");
+      } else if (timeInMinutes === 1) {
+        setEstimatedTime("1 minute");
+      } else if (timeInMinutes < 60) {
+        setEstimatedTime(`${timeInMinutes} minutes`);
+      } else {
+        const hours = Math.floor(timeInMinutes / 60);
+        const minutes = timeInMinutes % 60;
+        setEstimatedTime(`${hours} hr ${minutes} min`);
+      }
+    } catch (error) {
+      console.error("Error in geocoding fallback:", error);
+      setEstimatedTime("5-10 minutes");
+      setDistance("~3 km");
     }
+  };
 
-    const geocodeData = await geocodeResponse.json();
-    if (!geocodeData || !geocodeData.length) {
-      throw new Error("Location not found");
-    }
 
-    const destLat = parseFloat(geocodeData[0].lat);
-    const destLng = parseFloat(geocodeData[0].lon);
-
-    // Calculate straight line distance (in km)
-    const distanceInKm = calculateDistance(
-      driverLat,
-      driverLng,
-      destLat,
-      destLng
-    );
-    
-    const roadDistance = distanceInKm * 1.3;
-    setDistance(formatDistance(roadDistance));
-
-    // Calculate time based on 50 km/h driving speed
-    const SPEED_KM_PER_HOUR = 50;
-    const timeInHours = roadDistance / SPEED_KM_PER_HOUR;
-    const timeInMinutes = Math.round(timeInHours * 60);
-
-    if (timeInMinutes < 1) {
-      setEstimatedTime("Less than a minute");
-    } else if (timeInMinutes === 1) {
-      setEstimatedTime("1 minute");
-    } else if (timeInMinutes < 60) {
-      setEstimatedTime(`${timeInMinutes} minutes`);
-    } else {
-      const hours = Math.floor(timeInMinutes / 60);
-      const minutes = timeInMinutes % 60;
-      setEstimatedTime(`${hours} hr ${minutes} min`);
-    }
-  } catch (error) {
-    console.error("Error in geocoding fallback:", error);
-    setEstimatedTime("5-10 minutes"); 
-    setDistance("~3 km");
-  }
-};
-
-  
   const formatDistance = (distance: number): string => {
     if (distance < 1) {
       return `${Math.round(distance * 1000)} m`;
@@ -273,22 +286,70 @@ const geocodeDestinationAndCalculate = async (
     lat2: number,
     lon2: number
   ): number => {
-    const R = 6371; 
+    const R = 6371;
     const dLat = deg2rad(lat2 - lat1);
     const dLon = deg2rad(lon2 - lon1);
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos(deg2rad(lat1)) *
-        Math.cos(deg2rad(lat2)) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
+      Math.cos(deg2rad(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    const distance = R * c; 
+    const distance = R * c;
     return distance;
   };
 
   const deg2rad = (deg: number): number => {
     return deg * (Math.PI / 180);
+  };
+
+  const handlePaymentSuccess = async (txHash: string, chainId: string) => {
+    try {
+      setIsLoading(true);
+
+      // Store transaction hash for displaying transaction info
+      setTxHash(txHash);
+      setSelectedChainId(chainId);
+
+      // Update payment status in the backend
+      const response = await fetch(
+        `http://localhost:7777/updateRidePayment/${activeRideId}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            txHash,
+            paymentStatus: "PAID",
+            chainId: chainId
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to update payment status");
+      }
+
+      // Update local ride data
+      setRideData((prev) =>
+        prev ? {
+          ...prev,
+          paymentStatus: "PAID",
+          paymentTxHash: txHash,
+          paymentChainId: chainId
+        } : null
+      );
+
+      setPaymentComplete(true);
+      toast.success("Payment completed successfully!");
+    } catch (error) {
+      console.error("Error updating payment status:", error);
+      toast.error("Payment recorded but failed to update ride status");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (loading) {
@@ -323,6 +384,30 @@ const geocodeDestinationAndCalculate = async (
   return (
     <>
       <Navbar />
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
+
+      {/* Payment Modal */}
+      {rideData && (
+        <PaymentModal
+          isOpen={isPaymentModalOpen}
+          onClose={() => setIsPaymentModalOpen(false)}
+          onSuccess={handlePaymentSuccess}
+          amount={rideData.price || "₹0"}
+          recipientAddress={rideData.driverId || "0x0000000000000000000000000000000000000000"}
+          rideId={activeRideId || ""}
+        />
+      )}
 
       <div className="min-h-screen bg-gray-100 p-4">
         <div className="max-w-5xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
@@ -443,7 +528,7 @@ const geocodeDestinationAndCalculate = async (
                 }
                 icon={<FaMapMarkerAlt className="text-red-500" />}
               />
-              
+
               {/* Distance and ETA detail row */}
               <DetailRow
                 label="DRIVER DETAILS"
@@ -463,6 +548,31 @@ const geocodeDestinationAndCalculate = async (
               />
             </div>
 
+            {/* Transaction Info Display */}
+            {(paymentComplete || rideData?.paymentStatus === "PAID") && (
+              <div className="mt-4">
+                <TransactionInfo
+                  txHash={txHash || rideData?.paymentTxHash || ""}
+                  chainId={selectedChainId || rideData?.paymentChainId || "0xaa36a7"}
+                />
+
+                {/* Testnet Info Box */}
+                <div className="mt-3 bg-blue-50 p-3 rounded-lg text-xs text-blue-800">
+                  <p className="font-medium mb-1">📘 About Testnet Payments</p>
+                  <p>This app uses Ethereum testnets for demonstration purposes. In a production environment, this would use real cryptocurrency on mainnet.</p>
+                  <div className="mt-2">
+                    <p className="font-medium">How to use testnet payments:</p>
+                    <ol className="list-decimal ml-4 mt-1 space-y-1">
+                      <li>Install the MetaMask browser extension</li>
+                      <li>Switch to Sepolia or Mumbai testnet in MetaMask</li>
+                      <li>Get free test ETH from a faucet (links available in payment screen)</li>
+                      <li>Make payments with zero real-world value</li>
+                    </ol>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Action buttons */}
             <div className="mt-6 flex space-x-3">
               <button
@@ -471,17 +581,50 @@ const geocodeDestinationAndCalculate = async (
               >
                 Back
               </button>
-              <button
-                className="flex-1 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition text-sm"
-                onClick={() => {
-                  localStorage.removeItem("activeRideId");
-                  localStorage.removeItem("activeDriverId");
-                  alert("Ride cancelled");
-                  window.history.back();
-                }}
-              >
-                Cancel Ride
-              </button>
+
+              {rideData?.status === "COMPLETED" && !paymentComplete && !rideData?.paymentStatus && (
+                <button
+                  className={`flex-1 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition text-sm flex items-center justify-center ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  onClick={() => setIsPaymentModalOpen(true)}
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <FaCreditCard className="mr-2" />
+                      Pay Now
+                    </>
+                  )}
+                </button>
+              )}
+
+              {(paymentComplete || rideData?.paymentStatus === "PAID") && (
+                <button
+                  className="flex-1 px-4 py-2 bg-gray-600 text-white rounded transition text-sm flex items-center justify-center cursor-not-allowed"
+                  disabled
+                >
+                  <FaCreditCard className="mr-2" />
+                  Payment Complete
+                </button>
+              )}
+
+              {rideData?.status !== "COMPLETED" && (
+                <button
+                  className="flex-1 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition text-sm"
+                  onClick={() => {
+                    localStorage.removeItem("activeRideId");
+                    localStorage.removeItem("activeDriverId");
+                    alert("Ride cancelled");
+                    window.history.back();
+                  }}
+                >
+                  Cancel Ride
+                </button>
+              )}
             </div>
           </div>
         </div>

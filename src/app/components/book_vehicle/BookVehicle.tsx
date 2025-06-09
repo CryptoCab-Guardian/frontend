@@ -1,6 +1,14 @@
 "use client";
 import { useState } from "react";
-import { FaRegThumbsUp, FaRegThumbsDown, FaThumbsUp, FaThumbsDown } from "react-icons/fa";
+import {
+	FaRegThumbsUp,
+	FaRegThumbsDown,
+	FaThumbsUp,
+	FaThumbsDown
+} from "react-icons/fa";
+import { IoLocationOutline, IoLocationSharp } from "react-icons/io5";
+import { BiMoney } from "react-icons/bi";
+import { BsCarFrontFill } from "react-icons/bs";
 import ConfirmationModal from "./ConfirmationModal";
 import Image from "next/image";
 
@@ -56,57 +64,92 @@ function BookVehicle({ order, onAccept, onReject, showActions, onSelect }: BookV
 
 	return (
 		<div
-			className="bg-black text-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer"
+			className="bg-gradient-to-r from-gray-900 to-black text-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 cursor-pointer border border-gray-800"
 			onClick={handleContainerClick}
 		>
-			<div className="grid grid-cols-3 md:grid-cols-4 gap-4">
+			<div className="grid grid-cols-1 md:grid-cols-4 gap-0">
 				{/* Image */}
-				<div className="col-span-1">
+				<div className="md:col-span-1 relative">
 					<Image
 						src="/driver/car.jpg"
 						alt="car"
 						width={300}
 						height={200}
-						className="h-full"
+						className="h-full w-full object-cover"
 					/>
+					<div className="absolute top-0 left-0 bg-gradient-to-r from-blue-600 to-blue-500 text-xs font-bold uppercase tracking-wider py-1 px-3 rounded-br-lg">
+						{order.category}
+					</div>
 				</div>
 
 				{/* Info */}
-				<div className="col-span-2 md:col-span-3 p-4 flex flex-col justify-between space-y-4">
+				<div className="md:col-span-3 p-5 flex flex-col justify-between space-y-4">
 					{/* Header */}
 					<div className="flex justify-between items-center">
-						<span className="text-lg uppercase tracking-wide text-gray-300">{order.category}</span>
-						<span className="text-2xl font-bold text-white">{order.price}</span>
+						<div className="flex items-center space-x-2">
+							<BsCarFrontFill className="text-blue-400" />
+							<span className="text-lg font-semibold text-blue-400">{order.category} Ride</span>
+						</div>
+						<div className="flex items-center bg-blue-600/20 px-3 py-2 rounded-lg">
+							<BiMoney className="text-green-400 mr-2" />
+							<span className="text-xl font-bold text-green-400">{order.price}</span>
+						</div>
 					</div>
 
 					{/* Trip Details */}
-					<div className="space-y-3 text-sm md:text-base">
-						<div className="flex items-center space-x-3">
-							<div className="w-2 h-2 bg-white rounded-full"></div>
-							<span>{order.pickupAddress}</span>
+					<div className="space-y-0 text-sm md:text-base">
+						{/* Pickup */}
+						<div className="flex items-start space-x-3 p-2 rounded-lg transition-colors hover:bg-gray-800/40">
+							<div className="mt-1">
+								<IoLocationOutline className="text-blue-400 text-xl" />
+							</div>
+							<div className="flex-1">
+								<p className="text-gray-400 text-xs font-medium uppercase tracking-wider">PICKUP</p>
+								<p className="text-white font-medium">{order.pickupAddress}</p>
+								{order.pickupDate && <p className="text-gray-400 text-xs">{order.pickupDate}</p>}
+							</div>
 						</div>
-						<div className="flex items-center space-x-3">
-							<div className="w-2 h-2 bg-white rounded-full"></div>
-							<span>{order.dropAddress}</span>
+
+						{/* Route Line */}
+						<div className="flex items-center pl-4 ml-1">
+							<div className="h-10 border-l-2 border-dashed border-gray-600"></div>
+						</div>
+
+						{/* Dropoff */}
+						<div className="flex items-start space-x-3 p-2 rounded-lg transition-colors hover:bg-gray-800/40">
+							<div className="mt-1">
+								<IoLocationSharp className="text-red-400 text-xl" />
+							</div>
+							<div className="flex-1">
+								<p className="text-gray-400 text-xs font-medium uppercase tracking-wider">DROPOFF</p>
+								<p className="text-white font-medium">{order.dropAddress}</p>
+								{order.dropDate && <p className="text-gray-400 text-xs">{order.dropDate}</p>}
+							</div>
 						</div>
 					</div>
 
 					{/* Actions */}
 					{showActions && (
-						<div className="flex justify-end space-x-4 pt-4">
+						<div className="flex justify-end space-x-4 pt-2">
 							<button
 								onClick={handleThumbsUpClick}
 								disabled={isRejected}
-								className={`text-2xl ${isRejected ? "opacity-50 cursor-not-allowed" : "text-green-400 hover:text-green-300"}`}
+								className={`flex items-center justify-center rounded-full p-3 transition-all duration-300 
+									${isRejected
+										? "bg-gray-800 opacity-50 cursor-not-allowed"
+										: "bg-green-500/20 text-green-400 hover:bg-green-500/30"}`}
 							>
-								{isLiked ? <FaThumbsUp /> : <FaRegThumbsUp />}
+								{isLiked ? <FaThumbsUp className="text-xl" /> : <FaRegThumbsUp className="text-xl" />}
 							</button>
 							<button
 								onClick={handleReject}
 								disabled={isLiked}
-								className={`text-2xl ${isLiked ? "opacity-50 cursor-not-allowed" : "text-red-400 hover:text-red-300"}`}
+								className={`flex items-center justify-center rounded-full p-3 transition-all duration-300 
+									${isLiked
+										? "bg-gray-800 opacity-50 cursor-not-allowed"
+										: "bg-red-500/20 text-red-400 hover:bg-red-500/30"}`}
 							>
-								{isRejected ? <FaThumbsDown /> : <FaRegThumbsDown />}
+								{isRejected ? <FaThumbsDown className="text-xl" /> : <FaRegThumbsDown className="text-xl" />}
 							</button>
 						</div>
 					)}
